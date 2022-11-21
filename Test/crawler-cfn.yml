@@ -171,3 +171,20 @@ Resources:
           SerdeInfo:
             SerializationLibrary: 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
           Location: 's3://TOKEN_S3_BUCKET_NAME/Test/cost_and_usage_data_status/'
+
+  AthenaWorkGroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: CloudAcademy
+      Description: CloudAcademy WorkGroup
+      State: ENABLED
+      Tags:
+        - Key: "org"
+          Value: "cloudacademy"
+      WorkGroupConfiguration:
+        BytesScannedCutoffPerQuery: 200000000
+        EnforceWorkGroupConfiguration: false
+        PublishCloudWatchMetricsEnabled: false
+        RequesterPaysEnabled: true
+        ResultConfiguration:
+          OutputLocation: 's3://TOKEN_S3_BUCKET_NAME/cost_and_usage_data/'
