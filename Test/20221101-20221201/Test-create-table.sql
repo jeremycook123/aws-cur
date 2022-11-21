@@ -1,4 +1,3 @@
-
 CREATE EXTERNAL TABLE Test.test(
 	identity_line_item_id STRING,
 	identity_time_interval STRING,
@@ -210,9 +209,8 @@ PARTITIONED BY (
 	year STRING,
 	month STRING
 )
-         
+
 ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
 WITH  SERDEPROPERTIES (
  'serialization.format' = '1'
-) LOCATION 's3://cloudacademy-s3/cur-reporrts/Test/Test/'
-     
+) LOCATION 's3://TOKEN_S3_BUCKET_NAME/cur-reports/Test/Test/'
