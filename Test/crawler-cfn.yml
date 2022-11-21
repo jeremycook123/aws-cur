@@ -30,7 +30,7 @@ Resources:
       DatabaseName: !Ref AWSCURDatabase
       Targets:
         S3Targets:
-          - Path: 's3://cloudacademy-s3-v2/Test/Test'
+          - Path: 's3://TOKEN_S3_BUCKET_NAME/Test/Test'
             Exclusions:
               - '**.json'
               - '**.yml'
@@ -97,7 +97,7 @@ Resources:
       FunctionName: !GetAtt AWSCURInitializer.Arn
       Principal: 's3.amazonaws.com'
       SourceAccount: !Ref AWS::AccountId
-      SourceArn: !Sub 'arn:${AWS::Partition}:s3:::cloudacademy-s3-v2'
+      SourceArn: !Sub 'arn:${AWS::Partition}:s3:::TOKEN_S3_BUCKET_NAME'
 
   AWSS3CURNotification:
     Type: 'AWS::Lambda::Function'
@@ -150,7 +150,7 @@ Resources:
     Properties:
       ServiceToken: !GetAtt AWSS3CURNotification.Arn
       TargetLambdaArn: !GetAtt AWSCURInitializer.Arn
-      BucketName: 'cloudacademy-s3-v2'
+      BucketName: 'TOKEN_S3_BUCKET_NAME'
       ReportKey: 'Test/Test'
 
   AWSCURReportStatusTable:
@@ -170,4 +170,4 @@ Resources:
           OutputFormat: 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
           SerdeInfo:
             SerializationLibrary: 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
-          Location: 's3://cloudacademy-s3-v2/Test/cost_and_usage_data_status/'
+          Location: 's3://TOKEN_S3_BUCKET_NAME/Test/cost_and_usage_data_status/'
