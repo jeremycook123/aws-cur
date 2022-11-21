@@ -1,6 +1,17 @@
 AWSTemplateFormatVersion: 2010-09-09
-Resources:
+Description: CloudAcademy Labs CUR CloudFormation Template
 
+Parameters:
+  AWSCURCrawlerComponentFunctionRoleArn:
+    Type: String
+
+  AWSCURCrawlerLambdaExecutorRoleArn:
+    Type: String
+
+  AWSS3CURLambdaExecutorRoleArn:
+    Type: String
+
+Resources:
   AWSCURDatabase:
     Type: 'AWS::Glue::Database'
     Properties:
@@ -8,96 +19,14 @@ Resources:
         Name: 'athenacurcfn_test'
       CatalogId: !Ref AWS::AccountId
 
-         
-
-  AWSCURCrawlerComponentFunction:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - glue.amazonaws.com
-            Action:
-              - 'sts:AssumeRole'
-      Path: /
-      ManagedPolicyArns:
-        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AWSGlueServiceRole'
-      Policies:
-        - PolicyName: AWSCURCrawlerComponentFunction
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
-                Resource: !Sub 'arn:${AWS::Partition}:logs:*:*:*'
-              - Effect: Allow
-                Action:
-                  - 'glue:UpdateDatabase'
-                  - 'glue:UpdatePartition'
-                  - 'glue:CreateTable'
-                  - 'glue:UpdateTable'
-                  - 'glue:ImportCatalogToGlue'
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - 's3:GetObject'
-                  - 's3:PutObject'
-                Resource: !Sub 'arn:${AWS::Partition}:s3:::cloudacademy-s3-v2/Test/Test*'
-        - PolicyName: AWSCURKMSDecryption
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'kms:Decrypt'
-                Resource: '*'
-       
-
-  AWSCURCrawlerLambdaExecutor:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - 'sts:AssumeRole'
-      Path: /
-      Policies:
-        - PolicyName: AWSCURCrawlerLambdaExecutor
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
-                Resource: !Sub 'arn:${AWS::Partition}:logs:*:*:*'
-              - Effect: Allow
-                Action:
-                  - 'glue:StartCrawler'
-                Resource: '*'
-       
-
   AWSCURCrawler:
     Type: 'AWS::Glue::Crawler'
     DependsOn:
       - AWSCURDatabase
-      - AWSCURCrawlerComponentFunction
     Properties:
       Name: AWSCURCrawler-Test
       Description: A recurring crawler that keeps your CUR table in Athena up-to-date.
-      Role: !GetAtt AWSCURCrawlerComponentFunction.Arn
+      Role: !Ref AWSCURCrawlerComponentFunctionRoleArn
       DatabaseName: !Ref AWSCURDatabase
       Targets:
         S3Targets:
@@ -112,7 +41,6 @@ Resources:
       SchemaChangePolicy:
         UpdateBehavior: UPDATE_IN_DATABASE
         DeleteBehavior: DELETE_FROM_DATABASE
-       
 
   AWSCURInitializer:
     Type: 'AWS::Lambda::Function'
@@ -155,14 +83,12 @@ Resources:
       Timeout: 30
       Runtime: nodejs16.x
       ReservedConcurrentExecutions: 1
-      Role: !GetAtt AWSCURCrawlerLambdaExecutor.Arn
-     
+      Role: !Ref AWSCURCrawlerLambdaExecutorRoleArn
 
   AWSStartCURCrawler:
     Type: 'Custom::AWSStartCURCrawler'
     Properties:
       ServiceToken: !GetAtt AWSCURInitializer.Arn
-     
 
   AWSS3CUREventLambdaPermission:
     Type: AWS::Lambda::Permission
@@ -172,44 +98,12 @@ Resources:
       Principal: 's3.amazonaws.com'
       SourceAccount: !Ref AWS::AccountId
       SourceArn: !Sub 'arn:${AWS::Partition}:s3:::cloudacademy-s3-v2'
-     
-
-  AWSS3CURLambdaExecutor:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - 'sts:AssumeRole'
-      Path: /
-      Policies:
-        - PolicyName: AWSS3CURLambdaExecutor
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
-                Resource: !Sub 'arn:${AWS::Partition}:logs:*:*:*'
-              - Effect: Allow
-                Action:
-                  - 's3:PutBucketNotification'
-                Resource: !Sub 'arn:${AWS::Partition}:s3:::cloudacademy-s3-v2'
-       
 
   AWSS3CURNotification:
     Type: 'AWS::Lambda::Function'
     DependsOn:
     - AWSCURInitializer
     - AWSS3CUREventLambdaPermission
-    - AWSS3CURLambdaExecutor
     Properties:
       Code:
         ZipFile: >
@@ -249,8 +143,7 @@ Resources:
       Timeout: 30
       Runtime: nodejs16.x
       ReservedConcurrentExecutions: 1
-      Role: !GetAtt AWSS3CURLambdaExecutor.Arn
-     
+      Role: !Ref AWSS3CURLambdaExecutorRoleArn
 
   AWSPutS3CURNotification:
     Type: 'Custom::AWSPutS3CURNotification'
@@ -259,7 +152,6 @@ Resources:
       TargetLambdaArn: !GetAtt AWSCURInitializer.Arn
       BucketName: 'cloudacademy-s3-v2'
       ReportKey: 'Test/Test'
-     
 
   AWSCURReportStatusTable:
     Type: 'AWS::Glue::Table'
