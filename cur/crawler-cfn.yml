@@ -4,19 +4,22 @@ Description: CloudAcademy Labs CUR CloudFormation Template
 Parameters:
   AWSCURCrawlerComponentFunctionRoleArn:
     Type: String
+    Description: Role Crawler Component Arn
 
   AWSCURCrawlerLambdaExecutorRoleArn:
     Type: String
+    Description: Role Crawler Lambda Executor Arn
 
   AWSS3CURLambdaExecutorRoleArn:
     Type: String
+    Description: Role S3 Bucket Lambda Exec Arn
 
 Resources:
   AWSCURDatabase:
     Type: 'AWS::Glue::Database'
     Properties:
       DatabaseInput:
-        Name: 'athenacurcfn_test'
+        Name: cur
       CatalogId: !Ref AWS::AccountId
 
   AWSCURCrawler:
@@ -155,7 +158,7 @@ Resources:
     Type: 'AWS::Glue::Table'
     DependsOn: AWSCURDatabase
     Properties:
-      DatabaseName: athenacurcfn_test
+      DatabaseName: cur
       CatalogId: !Ref AWS::AccountId
       TableInput:
         Name: 'cost_and_usage_data_status'
