@@ -19,7 +19,7 @@ Resources:
     Type: 'AWS::Glue::Database'
     Properties:
       DatabaseInput:
-        Name: cur
+        Name: cloudacademy
       CatalogId: !Ref AWS::AccountId
 
   AWSCURCrawler:
@@ -158,7 +158,7 @@ Resources:
     Type: 'AWS::Glue::Table'
     DependsOn: AWSCURDatabase
     Properties:
-      DatabaseName: cur
+      DatabaseName: cloudacademy
       CatalogId: !Ref AWS::AccountId
       TableInput:
         Name: 'cost_and_usage_data_status'
