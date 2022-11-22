@@ -82,7 +82,6 @@ Resources:
       Handler: 'index.handler'
       Timeout: 30
       Runtime: nodejs16.x
-      ReservedConcurrentExecutions: 1
       Role: !Ref AWSCURCrawlerLambdaExecutorRoleArn
 
   AWSStartCURCrawler:
@@ -142,7 +141,6 @@ Resources:
       Handler: 'index.handler'
       Timeout: 30
       Runtime: nodejs16.x
-      ReservedConcurrentExecutions: 1
       Role: !Ref AWSS3CURLambdaExecutorRoleArn
 
   AWSPutS3CURNotification:
