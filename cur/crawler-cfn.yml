@@ -30,7 +30,7 @@ Resources:
       DatabaseName: !Ref AWSCURDatabase
       Targets:
         S3Targets:
-          - Path: 's3://TOKEN_S3_BUCKET_NAME/Test/Test'
+          - Path: 's3://TOKEN_S3_BUCKET_NAME/cur/data'
             Exclusions:
               - '**.json'
               - '**.yml'
@@ -149,7 +149,7 @@ Resources:
       ServiceToken: !GetAtt AWSS3CURNotification.Arn
       TargetLambdaArn: !GetAtt AWSCURInitializer.Arn
       BucketName: 'TOKEN_S3_BUCKET_NAME'
-      ReportKey: 'Test/Test'
+      ReportKey: 'cur/data'
 
   AWSCURReportStatusTable:
     Type: 'AWS::Glue::Table'
@@ -168,4 +168,4 @@ Resources:
           OutputFormat: 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
           SerdeInfo:
             SerializationLibrary: 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
-          Location: 's3://TOKEN_S3_BUCKET_NAME/Test/cost_and_usage_data_status/'
+          Location: 's3://TOKEN_S3_BUCKET_NAME/cur/cost_and_usage_data_status/'
