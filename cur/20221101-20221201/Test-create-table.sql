@@ -1,4 +1,4 @@
-CREATE EXTERNAL TABLE Test.test(
+CREATE EXTERNAL TABLE cloudacademy.cur(
 	identity_line_item_id STRING,
 	identity_time_interval STRING,
 	bill_invoice_id STRING,
@@ -213,4 +213,4 @@ PARTITIONED BY (
 ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
 WITH  SERDEPROPERTIES (
  'serialization.format' = '1'
-) LOCATION 's3://TOKEN_S3_BUCKET_NAME/cur-reports/Test/Test/'
+) LOCATION 's3://TOKEN_S3_BUCKET_NAME/cur/data/'
